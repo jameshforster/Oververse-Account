@@ -1,6 +1,6 @@
 package helpers
 
-import akka.stream.{Attributes, ClosedShape, Graph, Materializer}
+import akka.stream.Materializer
 import akka.util.ByteString
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{Matchers, WordSpec}
@@ -27,5 +27,5 @@ trait TestSpec extends WordSpec with Matchers with MockitoSugar with OneAppPerSu
     await(result).body.consumeData
   }
 
-  private val materializer: Materializer = mock[Materializer]
+  private val materializer: Materializer = app.materializer
 }
