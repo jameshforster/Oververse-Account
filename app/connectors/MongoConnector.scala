@@ -1,6 +1,7 @@
 package connectors
 
 import com.google.inject.Inject
+import models.BadGatewayException
 import play.api.Logger
 import play.api.libs.json._
 import play.modules.reactivemongo.json._
@@ -27,7 +28,7 @@ class MongoConnector @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends R
 
         if (last.isEmpty) {
           Cursor.Cont(last)
-        } else Cursor.Fail(error)
+        } else Cursor.Fail(new BadGatewayException(error.getMessage))
     }
 
     def filterList(collection: JSONCollection): Future[List[T]] = {
@@ -63,7 +64,7 @@ class MongoConnector @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends R
 
     def mapResult(result: WriteResult): Future[Unit] = {
       if (result.ok) Future.successful {}
-      else throw new Exception(s"Failed to write to database: ${result.code.get} ${result.writeErrors}")
+      else throw new BadGatewayException(s"Failed to write to database: ${result.code.get} ${result.writeErrors}")
     }
 
     for {
@@ -82,7 +83,7 @@ class MongoConnector @Inject()(val reactiveMongoApi: ReactiveMongoApi) extends R
 
     def mapResult(result: UpdateWriteResult): Future[Unit] = {
       if (result.ok) Future.successful {}
-      else throw new Exception(s"Failed to update document in database: ${result.code.get} ${result.errmsg.get}")
+      else throw new BadGatewayException(s"Failed to update document in database: ${result.code.get} ${result.errmsg.get}")
     }
 
     for {
