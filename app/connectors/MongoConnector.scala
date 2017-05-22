@@ -3,12 +3,14 @@ package connectors
 import com.google.inject.Inject
 import play.api.Logger
 import play.api.libs.json._
+import play.modules.reactivemongo.json._
 import play.modules.reactivemongo.{ReactiveMongoApi, ReactiveMongoComponents}
 import reactivemongo.api.Cursor
 import reactivemongo.api.commands.{UpdateWriteResult, WriteResult}
 import reactivemongo.play.json.collection.JSONCollection
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by Overlord59 on 18/05/2017.

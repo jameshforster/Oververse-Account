@@ -3,6 +3,7 @@ package models
 import play.api.Play
 import play.api.libs.json.{Json, OFormat}
 import services.EncryptionService
+import play.api.Play.current
 
 /**
   * Created by Overlord59 on 18/05/2017.

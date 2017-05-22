@@ -21,5 +21,5 @@ object User {
         user.password,
         user.email,
         user.level,
-        user.token.map{_})
+        user.token.map{x => x})
 }
