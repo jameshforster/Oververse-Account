@@ -3,7 +3,7 @@ package controllers
 import com.google.inject.{Inject, Singleton}
 import models.{BadRequestException, User}
 import play.api.mvc.{Action, AnyContent}
-import services.AccountService
+import services.UserService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -13,7 +13,7 @@ import scala.util.{Success, Try}
   * Created by Overlord59 on 22/05/2017.
   */
 @Singleton
-class AccountController @Inject()(accountService: AccountService) extends OververseController {
+class AccountController @Inject()(accountService: UserService) extends OververseController {
 
   val register: Action[AnyContent] = Action.async {
     implicit request => {

@@ -18,12 +18,6 @@ case class User(username: String,
 object User {
   implicit val jsonFormats: OFormat[User] = Json.format[User]
 
-  implicit val decrypt: EncryptedUser => User =
-    user =>
-      User(user.username,
-        user.password,
-        user.email)
-
   val passwordCheck: String => Boolean =
     password => {
       val strongRegex = new Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,})")

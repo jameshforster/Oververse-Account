@@ -2,7 +2,7 @@ package controllers
 
 import helpers.TestSpec
 import models.{NoContentResponse, Response, User}
-import services.AccountService
+import services.UserService
 import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers._
 import play.api.libs.json.Json
@@ -16,7 +16,7 @@ import scala.concurrent.Future
 class AccountControllerSpec extends TestSpec {
 
   def setupController(response: Future[Response]): AccountController = {
-    val mockAccountService = mock[AccountService]
+    val mockAccountService = mock[UserService]
 
     when(mockAccountService.register(any()))
     .thenReturn(response)
