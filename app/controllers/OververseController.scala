@@ -11,7 +11,7 @@ import scala.concurrent.Future
   */
 trait OververseController extends Controller {
 
-  val handleError: Exception => Future[Result] = {
+  val handleError: PartialFunction[Throwable, Future[Result]] = {
     case e: BadRequestException => Future.successful(BadRequest(Json.toJson(e.getMessage)))
     case e: ConflictException => Future.successful(Conflict(Json.toJson(e.getMessage)))
     case e: BadGatewayException => Future.successful(BadGateway(Json.toJson(e.getMessage)))

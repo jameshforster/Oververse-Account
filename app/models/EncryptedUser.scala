@@ -16,10 +16,7 @@ object EncryptedUser {
 
   implicit val encrypt: User => EncryptedUser =
     user =>
-      EncryptedUser(
-        user.username,
+      EncryptedUser(user.username,
         user.password,
-        user.email,
-        user.level,
-        user.token.map{x => x})
+        user.email)
 }

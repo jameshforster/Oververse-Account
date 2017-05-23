@@ -27,38 +27,44 @@ class AccountServiceSpec extends TestSpec {
 
   "Calling .register" should {
 
-    "return a BadGatewayException when the mongo connection fails on request" in {
+    "return a BadGatewayException when the mongo connection fails on request" which {
       lazy val service = setupService(Future.failed(new BadGatewayException("Failed to read database")), Future.successful {})
-      lazy val result = service.register(User("name", "password", "email"))
+      lazy val result = service.register(User("name", "P4ssword", "email@example.com"))
 
-      intercept[Exception] {
-        await(result)
-      }.isInstanceOf[BadGatewayException]
+      lazy val exception = intercept[BadGatewayException] { await(result) }
+
+      "has the BadGateway message" in {
+        exception.getMessage shouldBe "Failed to read database"
+      }
     }
 
-    "return a ConflictException when a duplicate user is found" in {
-      lazy val service = setupService(Future.successful(Some(User("name", "password", "email"))), Future.successful {})
-      lazy val result = service.register(User("name", "password", "email"))
+    "return a ConflictException when a duplicate user is found" which {
+      lazy val service = setupService(Future.successful(Some(User("name", "P4ssword", "email@example.com"))), Future.successful {})
+      lazy val result = service.register(User("name", "P4ssword", "email@example.com"))
 
-      intercept[Exception] {
-        await(result)
-      }.isInstanceOf[ConflictException]
+      lazy val exception = intercept[ConflictException] { await(result) }
+
+      "has the conflict message for a user" in {
+        exception.getMessage shouldBe "User with name name already exists."
+      }
     }
 
-    "return a BadGatewayException when the mongo connection fails on put" in {
+    "return a BadGatewayException when the mongo connection fails on put" which {
       lazy val service = setupService(Future.successful(None), Future.failed(new BadGatewayException("Failed to write to database")))
-      lazy val result = service.register(User("name", "password", "email"))
+      lazy val result = service.register(User("name", "P4ssword", "email@example.com"))
 
-      intercept[Exception] {
-        await(result)
-      }.isInstanceOf[BadGatewayException]
+      lazy val exception = intercept[BadGatewayException] { await(result) }
+
+      "has the BadGateway message" in {
+        exception.getMessage shouldBe "Failed to write to database"
+      }
     }
 
     "return a NoContent Response when the user is registered" in {
       lazy val service = setupService(Future.successful(None), Future.successful {})
-      lazy val result = service.register(User("name", "password", "email"))
+      lazy val result = service.register(User("name", "P4ssword", "email@example.com"))
 
-      await(result).isInstanceOf[NoContentResponse]
+      await(result).isInstanceOf[NoContentResponse] shouldBe true
     }
   }
 }
