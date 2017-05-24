@@ -11,9 +11,9 @@ import scala.concurrent.Future
 /**
   * Created by james-forster on 22/05/17.
   */
-class UserServiceSpec extends TestSpec {
+class AuthServiceSpec extends TestSpec {
 
-  def setupService(fetchResponse: Future[Option[EncryptedUser]], saveResponse: Future[Unit]): UserService = {
+  def setupService(fetchResponse: Future[Option[EncryptedUser]], saveResponse: Future[Unit]): AuthService = {
     val mockConnector = mock[MongoConnector]
 
     when(mockConnector.getEntry[EncryptedUser](any(), any(), any())(any()))
@@ -25,7 +25,7 @@ class UserServiceSpec extends TestSpec {
     when(mockConnector.updateEntry(any(), any(), any(), any())(any()))
       .thenReturn(saveResponse)
 
-    new UserService(mockConnector)
+    new AuthService(mockConnector)
   }
 
   "Calling .register" should {
@@ -63,11 +63,11 @@ class UserServiceSpec extends TestSpec {
       }
     }
 
-    "return a NoContent Response when the user is registered" in {
+    "return a Created Response when the user is registered" in {
       lazy val service = setupService(Future.successful(None), Future.successful {})
       lazy val result = service.register(User("name", "P4ssword", "email@example.com"))
 
-      await(result).isInstanceOf[NoContentResponse] shouldBe true
+      await(result).isInstanceOf[CreatedResponse] shouldBe true
     }
   }
 

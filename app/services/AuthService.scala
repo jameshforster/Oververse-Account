@@ -1,5 +1,7 @@
 package services
 
+import java.time.LocalDateTime
+
 import com.google.inject.{Inject, Singleton}
 import connectors.MongoConnector
 import models._
@@ -14,7 +16,7 @@ import scala.util.Random
   * Created by james-forster on 22/05/17.
   */
 @Singleton
-class UserService @Inject()(mongoConnector: MongoConnector) {
+class AuthService @Inject()(mongoConnector: MongoConnector) {
 
   private def createToken: Future[Token] = {
     val encoder = new Hex
@@ -24,9 +26,9 @@ class UserService @Inject()(mongoConnector: MongoConnector) {
 
   def register(user: User): Future[Response] = {
 
-    def saveNewUser(user: EncryptedUser): Future[NoContentResponse] = {
+    def saveNewUser(user: EncryptedUser): Future[CreatedResponse] = {
       mongoConnector.putEntry("accounts", user).map { _ =>
-        NoContentResponse()
+        CreatedResponse()
       }
     }
 
@@ -47,6 +49,28 @@ class UserService @Inject()(mongoConnector: MongoConnector) {
       case Some(user) =>
         for {
           token <- verifyPassword(user.password)
+          _ <- mongoConnector.updateEntry[EncryptedUser]("accounts", "username", Json.toJson(username), EncryptedUser(user.username, user.password, user.email, user.level, Some(token)))
+        } yield token
+      case _ => throw new BadRequestException(s"User with name $username does not exist.")
+    }
+  }
+
+  def authorise(username: String, token: EncryptedToken, requiredLevel: Int): Future[EncryptedToken] = {
+
+    def verifyLevel(user: EncryptedUser): Future[Token] = {
+      if (user.level >= requiredLevel) verifyToken(token, user.token.getOrElse(throw new UnauthorisedException(s"No token found for user ${user.username}")))
+      else throw new ForbiddenException(s"The auth level ${user.level} for user $username is below the required value of $requiredLevel")
+    }
+
+    def verifyToken(submitted: Token, expected: Token): Future[Token] = {
+      if (submitted == expected && expected.expiration.isAfter(LocalDateTime.now())) Future.successful(Token(submitted.token))
+      else throw new UnauthorisedException(s"Auth token for $username has expired")
+    }
+
+    mongoConnector.getEntry[EncryptedUser]("accounts", "username", Json.toJson(username)).flatMap {
+      case Some(user) =>
+        for {
+          token <- verifyLevel(user)
           _ <- mongoConnector.updateEntry[EncryptedUser]("accounts", "username", Json.toJson(username), EncryptedUser(user.username, user.password, user.email, user.level, Some(token)))
         } yield token
       case _ => throw new BadRequestException(s"User with name $username does not exist.")

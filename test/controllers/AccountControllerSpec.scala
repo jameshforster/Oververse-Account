@@ -2,7 +2,7 @@ package controllers
 
 import helpers.TestSpec
 import models.{NoContentResponse, Response, User}
-import services.UserService
+import services.AuthService
 import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers._
 import play.api.libs.json.Json
@@ -16,7 +16,7 @@ import scala.concurrent.Future
 class AccountControllerSpec extends TestSpec {
 
   def setupController(response: Future[Response]): AccountController = {
-    val mockAccountService = mock[UserService]
+    val mockAccountService = mock[AuthService]
 
     when(mockAccountService.register(any()))
     .thenReturn(response)
@@ -69,8 +69,8 @@ class AccountControllerSpec extends TestSpec {
       lazy val controller = setupController(Future.successful(NoContentResponse()))
       lazy val result = controller.register(FakeRequest("POST", "").withJsonBody(Json.toJson(User("name", "P4ssword", "email@example.com"))))
 
-      "return a status of 204" in {
-        statusOf(result) shouldBe 204
+      "return a status of 201" in {
+        statusOf(result) shouldBe 201
       }
     }
 
