@@ -58,12 +58,17 @@ class AuthService @Inject()(mongoConnector: MongoConnector) {
   def authorise(username: String, token: EncryptedToken, requiredLevel: Int): Future[EncryptedToken] = {
 
     def verifyLevel(user: EncryptedUser): Future[Token] = {
-      if (user.level >= requiredLevel) verifyToken(token, user.token.getOrElse(throw new UnauthorisedException(s"No token found for user ${user.username}")))
+      if (user.level >= requiredLevel) verifyToken(user.token.getOrElse(throw new UnauthorisedException(s"No token found for user ${user.username}")))
       else throw new ForbiddenException(s"The auth level ${user.level} for user $username is below the required value of $requiredLevel")
     }
 
-    def verifyToken(submitted: Token, expected: Token): Future[Token] = {
-      if (submitted == expected && expected.expiration.isAfter(LocalDateTime.now())) Future.successful(Token(submitted.token))
+    def verifyMatchingToken(submitted: Token, expected: Token) = {
+      if (submitted == expected) Future.successful(Token(submitted.token))
+      else throw new UnauthorisedException(s"Invalid token for $username")
+    }
+
+    def verifyToken(expected: EncryptedToken): Future[Token] = {
+      if (expected.expiration.isAfter(LocalDateTime.now())) verifyMatchingToken(token, expected)
       else throw new UnauthorisedException(s"Auth token for $username has expired")
     }
 
