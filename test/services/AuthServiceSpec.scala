@@ -117,11 +117,11 @@ class AuthServiceSpec extends TestSpec {
       }
     }
 
-    "return an encrypted token when user details are validated" in {
+    "return a token when user details are validated" in {
       lazy val service = setupService(Future.successful(Some(User("name", "P4ssword", "example@email.com"))), Future.successful {})
       lazy val result = service.login("name", "P4ssword")
 
-      await(result).isInstanceOf[EncryptedToken]
+      await(result).isInstanceOf[Token] shouldBe true
     }
   }
 }

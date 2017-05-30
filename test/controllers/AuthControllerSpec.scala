@@ -17,7 +17,7 @@ import scala.concurrent.Future
   */
 class AuthControllerSpec extends TestSpec {
 
-  def setupController(serviceResponse: Future[EncryptedToken]): AuthController = {
+  def setupController(serviceResponse: Future[Token]): AuthController = {
     val mockService = mock[AuthService]
 
     when(mockService.login(any(), any()))
@@ -42,9 +42,7 @@ class AuthControllerSpec extends TestSpec {
     }
 
     "provided with a valid body" should {
-      val tokenVal = EncryptedToken(EncryptedString(Map(
-        "nonce" -> "f937c6fb7f4c015c19b18d461a984ac2b9b38eeee1808f97ea7602fcde77b2ed",
-        "value" -> "5c7c7d516b1becd1f40cce49f0903d7a")), LocalDateTime.of(2016, 5, 1, 10, 10))
+      val tokenVal = Token("token", LocalDateTime.of(2016, 5, 1, 10, 10))
       lazy val controller = setupController(Future.successful(tokenVal))
       lazy val result = controller.login("name")(FakeRequest("POST", "").withJsonBody(Json.toJson("password")))
 
@@ -53,7 +51,7 @@ class AuthControllerSpec extends TestSpec {
       }
 
       "return the message for a bad request" in {
-        bodyOf(result) shouldBe "{\"token\":{\"eString\":{\"nonce\":\"f937c6fb7f4c015c19b18d461a984ac2b9b38eeee1808f97ea7602fcde77b2ed\",\"value\":\"5c7c7d516b1becd1f40cce49f0903d7a\"}},\"expiration\":\"2016-05-01T10:10:00\"}"
+        bodyOf(result) shouldBe "{\"token\":\"token\",\"expiration\":\"2016-05-01T10:10:00\"}"
       }
     }
 

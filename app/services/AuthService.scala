@@ -38,7 +38,7 @@ class AuthService @Inject()(mongoConnector: MongoConnector) {
     }
   }
 
-  def login(username: String, password: String): Future[EncryptedToken] = {
+  def login(username: String, password: String): Future[Token] = {
 
     def verifyPassword(expected: String): Future[Token] = {
       if (password == expected) createToken
@@ -55,7 +55,7 @@ class AuthService @Inject()(mongoConnector: MongoConnector) {
     }
   }
 
-  def authorise(username: String, token: EncryptedToken, requiredLevel: Int): Future[EncryptedToken] = {
+  def authorise(username: String, token: Token, requiredLevel: Int): Future[Token] = {
 
     def verifyLevel(user: EncryptedUser): Future[Token] = {
       if (user.level >= requiredLevel) verifyToken(user.token.getOrElse(throw new UnauthorisedException(s"No token found for user ${user.username}")))
